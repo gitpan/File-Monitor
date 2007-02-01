@@ -6,7 +6,7 @@ use Carp;
 
 use base qw(File::Monitor::Base);
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
 my %TAXONOMY;
 
@@ -42,7 +42,6 @@ BEGIN {
             deleted     => $deleted,
             metadata    => {
                     time        => {
-                        atime       => $num_diff,
                         mtime       => $num_diff,
                         ctime       => $num_diff,
                     },
@@ -64,7 +63,7 @@ BEGIN {
     );
 
     my @OBJ_ATTR = qw(
-        dev inode mode num_links uid gid rdev size atime mtime ctime
+        dev inode mode num_links uid gid rdev size mtime ctime
         blk_size blocks error files
     );
 
@@ -242,7 +241,7 @@ File::Monitor::Delta - Encapsulate a change to a file or directory
 
 =head1 VERSION
 
-This document describes File::Monitor::Delta version 0.0.1
+This document describes File::Monitor::Delta version 0.0.2
 
 =head1 SYNOPSIS
 
@@ -300,7 +299,6 @@ hierarchy:
         deleted
         metadata
             time
-                atime
                 mtime
                 ctime
             perms
@@ -312,9 +310,9 @@ hierarchy:
             files_created
             files_deleted
 
-The terminal nodes of that tree (C<created>, C<deleted>, C<atime>,
-C<mtime>, C<ctime>, C<uid>, C<gid>, C<mode>, C<size>, C<files_created>
-and C<files_deleted>) represent actual change events. Non terminal nodes
+The terminal nodes of that tree (C<created>, C<deleted>, C<mtime>,
+C<ctime>, C<uid>, C<gid>, C<mode>, C<size>, C<files_created> and
+C<files_deleted>) represent actual change events. Non terminal nodes
 represent broader classifications of events. For example if a file's
 mtime changes the resulting C<File::Monitor::Delta> object will return
 true for each of
@@ -337,8 +335,8 @@ These accessors return information about the state of the file or
 directory before the detected change:
 
     old_dev old_inode old_mode old_num_links old_uid old_gid
-    old_rdev old_size old_atime old_mtime old_ctime old_blk_size
-    old_blocks old_error old_files
+    old_rdev old_size old_mtime old_ctime old_blk_size old_blocks
+    old_error old_files
 
 For example:
 
@@ -347,8 +345,8 @@ For example:
 These accessors return information about the state of the file or
 directory after the detected change:
 
-    new_dev new_inode new_mode new_num_links new_uid new_gid new_rdev
-    new_size new_atime new_mtime new_ctime new_blk_size new_blocks
+    new_dev new_inode new_mode new_num_links new_uid new_gid
+    new_rdev new_size new_mtime new_ctime new_blk_size new_blocks
     new_error new_files
 
 For example:
@@ -358,7 +356,7 @@ For example:
 These accessors return a value that reflects the change in the
 corresponding attribute:
 
-    created deleted atime mtime ctime uid gid mode size
+    created deleted mtime ctime uid gid mode size
 
 With the exception of C<mode>, C<created> and C<deleted> they return
 the difference between the old value and the new value. This is only
@@ -451,7 +449,7 @@ if a file's size changes the following will all return true:
 
 Valid eventnames are
 
-    change created deleted metadata time atime mtime ctime perms uid gid
+    change created deleted metadata time mtime ctime perms uid gid
     mode size directory files_created files_deleted
 
 As an alternative interface you may call C<is_>I<eventname> directly.
@@ -485,12 +483,11 @@ As mentioned above a large number of other accessors are provided to get
 the state of the object before and after the change and query details of
 the change:
 
-    old_dev old_inode old_mode old_num_links old_uid old_gid
-    old_rdev old_size old_atime old_mtime old_ctime old_blk_size
-    old_blocks old_error old_files new_dev new_inode new_mode
-    new_num_links new_uid new_gid new_rdev new_size new_atime
-    new_mtime new_ctime new_blk_size new_blocks new_error new_files
-    created deleted atime mtime ctime uid gid mode size
+    old_dev old_inode old_mode old_num_links old_uid old_gid old_rdev
+    old_size old_mtime old_ctime old_blk_size old_blocks old_error
+    old_files new_dev new_inode new_mode new_num_links new_uid new_gid
+    new_rdev new_size new_mtime new_ctime new_blk_size new_blocks
+    new_error new_files created deleted mtime ctime uid gid mode size
     files_created files_deleted name
 
 See L</Accessors> for details of these.

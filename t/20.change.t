@@ -7,7 +7,7 @@ use Test::More;
 use File::Monitor::Object;
 use File::Monitor::Delta;
 
-plan tests => 410;
+plan tests => 381;
 
 my @tests = (
     {
@@ -46,7 +46,6 @@ my @tests = (
         },
         expect => {
             mode          => 0x000081a4 ^ 0x000040c9,
-            atime         => 30,
             ctime         => 10,
             mtime         => -40,
             gid           => 501,
@@ -94,7 +93,6 @@ my @tests = (
         },
         expect => {
             mode          => 0x000081a4 ^ 0x000040c9,
-            atime         => -30,
             ctime         => -10,
             mtime         => 40,
             gid           => -501,
@@ -148,12 +146,11 @@ my @tests = (
 );
 
 my @read_only_attr = qw(
-    old_dev old_inode old_mode old_num_links old_uid old_gid
-    old_rdev old_size old_atime old_mtime old_ctime old_blk_size
-    old_blocks old_error old_files new_dev new_inode new_mode
-    new_num_links new_uid new_gid new_rdev new_size new_atime
-    new_mtime new_ctime new_blk_size new_blocks new_error new_files
-    created deleted atime mtime ctime uid gid mode size
+    old_dev old_inode old_mode old_num_links old_uid old_gid old_rdev
+    old_size old_mtime old_ctime old_blk_size old_blocks old_error
+    old_files new_dev new_inode new_mode new_num_links new_uid new_gid
+    new_rdev new_size new_mtime new_ctime new_blk_size new_blocks
+    new_error new_files created deleted mtime ctime uid gid mode size
     files_created files_deleted name
 );
 

@@ -1,7 +1,8 @@
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 BEGIN {
     use_ok( 'File::Monitor' );
+    use_ok( 'File::Monitor::Delta' );
     use_ok( 'File::Monitor::Object' );
 }
 

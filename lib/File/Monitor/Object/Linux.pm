@@ -1,93 +1,68 @@
-package File::Monitor::Base;
+package File::Monitor::Object::Linux;
+
 use strict;
 use warnings;
 use Carp;
 use File::Spec;
-use version;
+use Fcntl ':mode';
 
-our $VERSION = qv('0.0.2');
+use File::Monitor::Delta;
 
-sub new {
-    my $class = shift;
-    my $self = bless {}, $class;
-    $self->_initialize(@_);
-    return $self;
-}
+use base qw(File::Monitor::Object);
 
-sub _report_extra {
-    my $self  = shift;
-    my $args  = shift;
-    my @extra = keys %$args;
-    croak "The following options are not recognised: ",
-        join(' ', sort @extra)
-        if @extra;
+use version; our $VERSION = qv('0.0.2');
+
+# Items read from /proc/sys/fs/inotify/*
+my %limits;
+
+# Called during File::Monitor::Object loading to decide
+# whether we can stand in for File::Monitor::Object.
+# If we can we return the classname that should used
+# instead of File::Monitor::Object. If we can't start
+# up we return undef.
+sub _stand_in {
+    return;
+    # eval "use Linux::Inotify2";
+    # return if $@;
+    # 
+    # # for my $lim (qw(max_queued_events max_user_instances max_user_watches)) {
+    # #     my $name = "/proc/sys/fs/inotify/$lim";
+    # #     warn "Reading $name\n";
+    # #     unless (open(my $lh, '<', $name)) {
+    # #         die "Can't read $name ($!)\n";
+    # #         next;
+    # #     }
+    # #         
+    # #     defined(my $val = <$lh>) or return;
+    # #     chomp($val);
+    # #     $limits{$lim} = $val;
+    # #     warn "$lim = $val\n";
+    # #     close($lh);
+    # # }
+    # 
+    # return __PACKAGE__;
 }
 
 sub _initialize {
     my $self = shift;
-}
+    my $args;
 
-sub _install_callbacks {
-    my $self = shift;
-    my $args = shift;
-
-    # Install callbacks
-    if (my $callback = delete $args->{callback}) {
-        if (ref $callback eq 'CODE') {
-            $self->callback('change', $callback);
-        } elsif (ref $callback eq 'HASH') {
-            while (my ($event, $cb) = each %$callback) {
-                $self->callback($event, $cb);
-            }
-        } else {
-            croak "A callback must be a code reference "
-                . "or a hash of code references";
-        }
-    }
-}
-
-sub _make_callbacks {
-    my $self   = shift;
-    my $change = shift;
-    $change->_trigger_callbacks($self->{_callbacks});
-}
-
-sub _canonical_name {
-    my $self = shift;
-    my $name = shift;
-    return File::Spec->canonpath(File::Spec->rel2abs($name));
-}
-
-sub callback {
-    my $self  = shift;
-    my $event = shift;
-    my $code  = shift;
-
-    # Allow event to be omitted
-    if (ref $event eq 'CODE' && !defined $code) {
-        ($code, $event) = ($event, 'changed');
-    }
-
-    croak "Callback must be a code references"
-        unless ref $code eq 'CODE';
-
-    $self->{_callbacks}->{$event} = $code;
+    $self->SUPER::_initialize( @_ );
 }
 
 1;
 
 =head1 NAME
 
-File::Monitor::Base - Common base class for file monitoring.
+File::Monitor::Object::Linux - Monitor a Linux filesystem object for changes.
 
 =head1 VERSION
 
-This document describes File::Monitor::Base version 0.0.2
+This document describes File::Monitor::Object::Linux version 0.0.2
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
-Don't use this class directly. See L<File::Monitor> and
-L<File::Monitor::Object> for the public interface.
+Not used directly.
 
 =head1 AUTHOR
 

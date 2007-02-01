@@ -41,7 +41,7 @@ sub touch_file {
 }
 
 my @events = qw(
-    change created deleted metadata time atime mtime ctime perms uid gid
+    change created deleted metadata time mtime ctime perms uid gid
     mode size directory files_created files_deleted
 );
 
@@ -503,15 +503,6 @@ SKIP: {
             my $name    = $change->name;
             my $caption = "$test_name($name)";
             my $expect  = delete $item->{expect}->{$name};
-
-            # Kludge: depending on whether the change crosses a second
-            # we might get an atime notification for the directory.
-            # If so we ignore it.
-            unless (defined $expect) {
-                if ($change->is_time && S_ISDIR($change->old_mode)) {
-                    next CH;
-                }
-            }
 
             ok $expect, "$caption: change expected for $name"
                 or warn Dumper($change);

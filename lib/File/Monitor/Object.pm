@@ -10,10 +10,11 @@ use File::Monitor::Delta;
 
 use base qw(File::Monitor::Base);
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
 my @STAT_FIELDS;
 my @INFO_FIELDS;
+my $CLASS;
 
 BEGIN {
 
@@ -58,6 +59,41 @@ BEGIN {
             return $self->{$attr};
         };
     }
+}
+
+sub _guess_class {
+    return $CLASS if $CLASS;
+    
+    my %stand_in = (
+        'File::Monitor::Object::Linux'  => qr/linux/
+    );
+
+    # Class to bless our objects to
+    $CLASS = __PACKAGE__;
+
+    # Attempt to find a platform specific stand-in
+    SI: while ( my ($module, $check) = each %stand_in ) {
+        if ( $^O =~ $check ) {
+            eval "require $module";
+            next SI if $@;
+            if ( my $class = $module->_stand_in ) {
+                $CLASS = $class;
+                last SI;
+            }
+        }
+    }
+
+    return $CLASS;
+}
+
+sub new {
+    my $class = shift;
+    
+    $class = _guess_class();
+    my $self = bless { }, $class;
+    $self->_initialize(@_);
+
+    return $self;
 }
 
 sub _initialize {
@@ -191,7 +227,7 @@ File::Monitor::Object - Monitor a filesystem object for changes.
 
 =head1 VERSION
 
-This document describes File::Monitor::Object version 0.0.1
+This document describes File::Monitor::Object version 0.0.2
 
 =head1 SYNOPSIS
 

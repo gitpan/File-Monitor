@@ -8,7 +8,7 @@ use base qw(File::Monitor::Base);
 
 use File::Monitor::Object;
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
 sub _initialize {
     my $self = shift;
@@ -31,13 +31,14 @@ sub set_watcher {
     }
 
     my $name = $object->name;
-    $self->{_monitors}->{$name} = $object;
+    
+    return $self->{_monitors}->{$name} = $object;
 }
 
 sub watch {
     my $self = shift;
 
-    $self->set_watcher(File::Monitor::Object->new( @_ ));
+    return $self->set_watcher( File::Monitor::Object->new( @_ ) );
 }
 
 sub unwatch {
@@ -72,7 +73,7 @@ File::Monitor - Monitor files and directories for changes.
 
 =head1 VERSION
 
-This document describes File::Monitor version 0.0.1
+This document describes File::Monitor version 0.0.2
 
 =head1 SYNOPSIS
 
