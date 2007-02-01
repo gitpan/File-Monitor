@@ -1,0 +1,7 @@
+Things to do:
+
+    * Use native file monitoring interface on platforms where it's
+      available.
+
+    * Implement a "don't scan more frequently that every X seconds"
+      functionality.

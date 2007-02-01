@@ -1,0 +1,38 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.55.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 cd122d292f10d7f881b4dc17fee5a4ada6968c0b Changes
+SHA1 e231acb4a987e9fbe8ba262c1e5f4e53d6697ce3 MANIFEST
+SHA1 ed7d7e5b89bf91971af7211d44fb2e63375cbeeb META.yml
+SHA1 b4ce1c11fef345b7bc7394626fdab609ec3bcdeb Makefile.PL
+SHA1 63ab073d4a267a420052bc3aba034d9eadc66066 README
+SHA1 ff644cf6452a770a8c250d4f994f86a81ebe49b1 TODO
+SHA1 ba1098ca17fa0f4af91a1d1c463f6e46787e9628 lib/File/Monitor.pm
+SHA1 a24e4d4ee07b70281cbf870ae8570184c22aebd7 lib/File/Monitor/Base.pm
+SHA1 b4496b3903d6412e5004458635cfe8e14a49c1ed lib/File/Monitor/Delta.pm
+SHA1 edb97126f9d946e31b8c91de99804c5f2f5c8ecb lib/File/Monitor/Object.pm
+SHA1 fe027eb0713be7ee8da6b7a4bf0dc1dea81f515f t/00.load.t
+SHA1 209b8f89f92df7fdafd89c923af934161217e7b5 t/10.monitor-basic.t
+SHA1 f6e2c89abc94ffac8f4b9e9754fdb773173bc84e t/20.change.t
+SHA1 d610ffd2281e0a9b00d029183e30be8884e21885 t/30.monitor.t
+SHA1 0190346d7072d458c8a10a45c19f86db641dcc48 t/pod.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (Darwin)
+
+iD8DBQFFwkXhwoknRJZQnCERArhZAKCoPVdboZfDR5rsnpsrVNu98OYJdACgwyDV
+j1bvZKSwQ2z8EVEKr8/LRdo=
+=3P4i
+-----END PGP SIGNATURE-----
