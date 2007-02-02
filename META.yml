@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                File-Monitor
-version:             v0.0.2
+version:             v0.0.3
 abstract:            Monitor files and directories for changes.
 license:             ~
 generated_by:        ExtUtils::MakeMaker version 6.31
