@@ -11,7 +11,7 @@ use File::Monitor::Delta;
 
 use base qw(File::Monitor::Base);
 
-use version; our $VERSION = qv('0.0.3');
+use version; our $VERSION = qv( '0.0.4' );
 
 my @STAT_FIELDS;
 my @INFO_FIELDS;
@@ -20,46 +20,46 @@ my $CLASS;
 BEGIN {
 
     @STAT_FIELDS = qw(
-        dev inode mode num_links uid gid rdev size atime mtime ctime
-        blk_size blocks
+      dev inode mode num_links uid gid rdev size atime mtime ctime
+      blk_size blocks
     );
 
-    @INFO_FIELDS = ( @STAT_FIELDS, qw(
-        error files
-    ) );
-
-    my @ATTR = qw(
-        name
+    @INFO_FIELDS = (
+        @STAT_FIELDS, qw(
+          error
+          )
     );
-
-    my $IS_ARRAY = qr{^files$};
 
     no strict 'refs';
 
     # Accessors for info
-    for my $info (@INFO_FIELDS) {
-        if ($info =~ $IS_ARRAY) {
-            *$info = sub {
-                my $self = shift;
-                croak "$info is read-only" if @_;
-                return @{ $self->{_info}->{$info} || [ ] };
-            };
-        } else {
-            *$info = sub {
-                my $self = shift;
-                croak "$info is read-only" if @_;
-                return $self->{_info}->{$info};
-            };
-        }
-    }
-
-    for my $attr (@ATTR) {
-        *$attr = sub {
+    for my $info ( @INFO_FIELDS ) {
+        *$info = sub {
             my $self = shift;
-            croak "$attr is read-only" if @_;
-            return $self->{$attr};
+            croak "$info attribute is read-only" if @_;
+            return $self->{_info}->{$info};
         };
     }
+}
+
+sub owner {
+    my $self = shift;
+    croak "name attribute is read-only" if @_;
+    return $self->{owner};
+}
+
+sub name {
+    my $self = shift;
+    croak "name attribute is read-only" if @_;
+    return $self->owner->_make_absolute( $self->{name} );
+}
+
+sub files {
+    my $self = shift;
+    croak "files attribute is read-only" if @_;
+    my $monitor = $self->owner;
+    return
+      map { $monitor->_make_absolute( $_ ) } @{ $self->{_info}->{files} || [] };
 }
 
 sub _initialize {
@@ -74,18 +74,18 @@ sub _initialize {
     $self->{_info}->{virgin} = 1;
 
     my $name = delete $args->{name}
-        or croak "The name option must be supplied";
+      or croak "The name option must be supplied";
+
+    $self->{owner} = delete $args->{owner}
+      or croak "A " . __PACKAGE__ . " must have an owner";
 
     # Build our object
-    $self->{name} = $self->_canonical_name( $name );
-    
-    $self->{_owner} = delete $args->{owner} 
-        or croak "A " . __PACKAGE__ . " must have an owner";
+    $self->{name} = $self->owner->_canonical_name( $name );
 
     # Avoid circular references
-    weaken $self->{_owner};
+    weaken $self->{owner};
 
-    for my $opt (qw(files recurse)) {
+    for my $opt ( qw(files recurse) ) {
         $self->{_options}->{$opt} = delete $args->{$opt};
     }
 
@@ -96,12 +96,11 @@ sub _read_dir {
     my $self = shift;
     my $dir  = shift;
 
-    opendir(my $dh, $dir) or die "Can't read $dir ($!)";
-    my @files = map { File::Spec->catfile($dir, $_) }
-                sort
-                grep { $_ !~ /^[.]{1,2}$/ }
-                readdir($dh);
-    closedir($dh);
+    opendir( my $dh, $dir ) or die "Can't read $dir ($!)";
+    my @files = map { File::Spec->catfile( $dir, $_ ) }
+      sort
+      grep { $_ !~ /^[.]{1,2}$/ } readdir( $dh );
+    closedir( $dh );
 
     return @files;
 }
@@ -122,17 +121,24 @@ sub _scan_object {
     eval {
         @info{@STAT_FIELDS} = $self->_stat( $name );
 
-        if (defined $info{mode} && S_ISDIR( $info{mode} )) {
+        if ( defined $info{mode} && S_ISDIR( $info{mode} ) ) {
+            my $monitor = $self->owner;
+
             # Do directory specific things
             if ( $self->{_options}->{files} ) {
+
                 # Expand one level
-                $info{files} = [ $self->_read_dir( $name ) ];
-            } elsif ( $self->{_options}->{recurse} ) {
+                $info{files} = [ map { $monitor->_make_relative( $_ ) }
+                      $self->_read_dir( $name ) ];
+            }
+            elsif ( $self->{_options}->{recurse} ) {
+
                 # Expand whole directory tree
                 my @work = $self->_read_dir( $name );
                 while ( my $obj = shift @work ) {
-                    push @{ $info{files} }, $obj;
-                    if (-d $obj) {
+                    push @{ $info{files} }, $monitor->_make_relative( $obj );
+                    if ( -d $obj ) {
+
                         # Depth first to simulate recursion
                         unshift @work, $self->_read_dir( $obj );
                     }
@@ -149,19 +155,22 @@ sub _scan_object {
 sub scan {
     my $self = shift;
 
-    my $info = $self->_scan_object;
-    my $name = $self->name;
-    my @changes = ( );
+    my $info    = $self->_scan_object;
+    my $name    = $self->name;
+    my @changes = ();
 
-    unless (delete $self->{_info}->{virgin}) {
+    unless ( delete $self->{_info}->{virgin} ) {
+
         # Already done one scan, so now we compute deltas
-        my $change = File::Monitor::Delta->new( {
-            object      => $self,
-            old_info    => $self->{_info},
-            new_info    => $info
-        } );
+        my $change = File::Monitor::Delta->new(
+            {
+                object   => $self,
+                old_info => $self->{_info},
+                new_info => $info
+            }
+        );
 
-        if ($change->is_change) {
+        if ( $change->is_change ) {
             $self->_make_callbacks( $change );
             push @changes, $change;
         }
@@ -180,7 +189,7 @@ File::Monitor::Object - Monitor a filesystem object for changes.
 
 =head1 VERSION
 
-This document describes File::Monitor::Object version 0.0.3
+This document describes File::Monitor::Object version 0.0.4
 
 =head1 SYNOPSIS
 
