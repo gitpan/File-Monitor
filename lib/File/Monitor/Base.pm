@@ -4,68 +4,69 @@ use warnings;
 use Carp;
 use File::Spec;
 
-our $VERSION = '0.10';
+our $VERSION = '1.00';
 
 sub new {
-    my $class = shift;
-    my $self = bless {}, $class;
-    $self->_initialize( @_ );
-    return $self;
+  my $class = shift;
+  my $self = bless {}, $class;
+  $self->_initialize( @_ );
+  return $self;
 }
 
 sub _report_extra {
-    my $self  = shift;
-    my $args  = shift;
-    my @extra = keys %$args;
-    croak "The following options are not recognised: ", join( ' ', sort @extra )
-      if @extra;
+  my $self  = shift;
+  my $args  = shift;
+  my @extra = keys %$args;
+  croak "The following options are not recognised: ",
+   join( ' ', sort @extra )
+   if @extra;
 }
 
 sub _initialize {
-    my $self = shift;
+  my $self = shift;
 }
 
 sub _install_callbacks {
-    my $self = shift;
-    my $args = shift;
+  my $self = shift;
+  my $args = shift;
 
-    # Install callbacks
-    if ( my $callback = delete $args->{callback} ) {
-        if ( ref $callback eq 'CODE' ) {
-            $self->callback( 'change', $callback );
-        }
-        elsif ( ref $callback eq 'HASH' ) {
-            while ( my ( $event, $cb ) = each %$callback ) {
-                $self->callback( $event, $cb );
-            }
-        }
-        else {
-            croak "A callback must be a code reference "
-              . "or a hash of code references";
-        }
+  # Install callbacks
+  if ( my $callback = delete $args->{callback} ) {
+    if ( ref $callback eq 'CODE' ) {
+      $self->callback( 'change', $callback );
     }
+    elsif ( ref $callback eq 'HASH' ) {
+      while ( my ( $event, $cb ) = each %$callback ) {
+        $self->callback( $event, $cb );
+      }
+    }
+    else {
+      croak "A callback must be a code reference "
+       . "or a hash of code references";
+    }
+  }
 }
 
 sub _make_callbacks {
-    my $self   = shift;
-    my $change = shift;
-    $change->_trigger_callbacks( $self->{_callbacks} );
+  my $self   = shift;
+  my $change = shift;
+  $change->_trigger_callbacks( $self->{_callbacks} );
 }
 
 sub callback {
-    my $self  = shift;
-    my $event = shift;
-    my $code  = shift;
+  my $self  = shift;
+  my $event = shift;
+  my $code  = shift;
 
-    # Allow event to be omitted
-    if ( ref $event eq 'CODE' && !defined $code ) {
-        ( $code, $event ) = ( $event, 'changed' );
-    }
+  # Allow event to be omitted
+  if ( ref $event eq 'CODE' && !defined $code ) {
+    ( $code, $event ) = ( $event, 'changed' );
+  }
 
-    croak "Callback must be a code references"
-      unless ref $code eq 'CODE';
+  croak "Callback must be a code references"
+   unless ref $code eq 'CODE';
 
-    $self->{_callbacks}->{$event} = $code;
+  $self->{_callbacks}->{$event} = $code;
 }
 
 1;
@@ -76,7 +77,7 @@ File::Monitor::Base - Common base class for file monitoring.
 
 =head1 VERSION
 
-This document describes File::Monitor::Base version 0.10
+This document describes File::Monitor::Base version 1.00
 
 =head1 DESCRIPTION
 
